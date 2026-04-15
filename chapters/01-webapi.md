@@ -161,8 +161,7 @@ struct SearchResponse: Codable {
 ```
 
 **何をしているか：**
-    APIから返ってくる 全体のJSON を表しています。
-    iTunes APIはこういうデータを返します：
+    APIから返ってくる 全体のJSON を表しています。　　iTunes APIはこういうデータを返します：
     
 
 **なぜこう書くのか：**
