@@ -159,7 +159,6 @@ struct SearchResponse: Codable {
     let results: [Song]
 }
 ```
-resultsの中に曲の配列があります
 
 **何をしているか：** <br>
 APIから返ってくる 全体のJSON を表しています。
@@ -178,10 +177,17 @@ iTunes Search API は、だいたいこういうJSONを返します。
 }
 ```
 
-**なぜこう書くのか：**
-APIのデータの形に合わせて書いているから
+**なぜこう書くのか：**<br>
+APIのデータの形に合わせて書いているから。
+曲は「results」の中に入っている。
+resultsの中に曲の配列があります。
+箱の中に物が入っている
+箱 → SearchResponse
+中身 → results
+物 → Song
 
-**もしこう書かなかったら：**
+**もしこう書かなかったら：**<br>
+箱を無視して中身を取ろうとする。
 データが正しく読み取れない（＝アプリが動かない or エラーになる））
 
 ---
@@ -189,10 +195,32 @@ APIのデータの形に合わせて書いているから
 ### API通信の処理
 
 ```swift
-// 該当部分のコードを抜粋して貼る
+func searchMusic() async {
+        guard let encodedText = searchText.addingPercentEncoding(
+            withAllowedCharacters: .urlQueryAllowed
+        ) else { return }
+
+        let urlString = "https://itunes.apple.com/search?term=\(encodedText)&media=music&country=jp&limit=25"
+
+        guard let url = URL(string: urlString) else { return }
+
+        isLoading = true
+
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let response = try JSONDecoder().decode(SearchResponse.self, from: data)
+            songs = response.results
+        } catch {
+            print("エラー: \(error.localizedDescription)")
+            songs = []
+        }
+
+        isLoading = false
+    }
 ```
 
-**何をしているか：**
+**何をしているか：**<br>
+ユーザーが入力したアーティスト名を使って iTunes Search API に通信し、検索結果を受け取って画面に表示するためのデータを作っています。流れとしては次のようになります。
 
 **なぜこう書くのか：**
 
