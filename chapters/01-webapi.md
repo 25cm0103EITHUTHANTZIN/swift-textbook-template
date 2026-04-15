@@ -160,13 +160,28 @@ struct SearchResponse: Codable {
 }
 ```
 
-**何をしているか：** 
+**何をしているか：** <br>
+APIから返ってくる 全体のJSON を表しています。
+iTunes Search API は、だいたいこういうJSONを返します。
+```json
+{
+  "results": [
+    {
+      "trackId": 123,
+      "trackName": "AAA",
+      "artistName": "BBB",
+      "artworkUrl100": "https://...",
+      "previewUrl": "https://..."
+    }
+  ]
+}
+```
 
 **なぜこう書くのか：**
-（別の書き方ではなく、この書き方が選ばれている理由を説明する）
+JSONの「results」＝ Swiftの「results」
 
 **もしこう書かなかったら：**
-（この部分を省略したり変えたりすると何が起きるか。実際に試した結果があればここに書く）
+データが正しく読み取れない（＝アプリが動かない or エラーになる））
 
 ---
 
