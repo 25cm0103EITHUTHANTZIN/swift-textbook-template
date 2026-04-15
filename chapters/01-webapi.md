@@ -159,6 +159,7 @@ struct SearchResponse: Codable {
     let results: [Song]
 }
 ```
+resultsの中に曲の配列があります
 
 **何をしているか：** <br>
 APIから返ってくる 全体のJSON を表しています。
@@ -178,7 +179,7 @@ iTunes Search API は、だいたいこういうJSONを返します。
 ```
 
 **なぜこう書くのか：**
-JSONの「results」＝ Swiftの「results」
+APIのデータの形に合わせて書いているから
 
 **もしこう書かなかったら：**
 データが正しく読み取れない（＝アプリが動かない or エラーになる））
