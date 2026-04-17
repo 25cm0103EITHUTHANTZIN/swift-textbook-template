@@ -129,9 +129,64 @@ JSONデータを受け取って使いやすくし、さらにSwiftUIのリスト
 
 ### Q4
 
-**質問：** get let　の使い方法やなぜ　get let使うかも説明してください.
+**質問：** guard let　の使い方法やなぜ　get let使うかも説明してください.
+
+```swift
+func searchMusic() async {
+        guard let encodedText = searchText.addingPercentEncoding(
+            withAllowedCharacters: .urlQueryAllowed
+        ) else { return }
+        
+        let urlString = "https://itunes.apple.com/search?term=\(encodedText)&media=music&country=jp&limit=25"
+        
+        guard let url = URL(string: urlString) else { return }
+
+ここでなんでguard letを使うの？
+
+guard letを使わないとどうなるの？
+
+guard letの使う方法や、どんな場合に使うべきかを詳しくせつめいしてください!
+
+```
 
 **AIの回答の要点：**
+
+**「nil だったらその先の処理を続けないため」**です。
+
+guard let は、Optional(値があるかもしれないし、ないかもしれない　型)に値が入っている時だけ先へ進むための書き方です。
+
+値がある → そのまま続ける
+
+値がない (nil) → else の中を実行して、その場を抜ける
+
+```swift
+  guard let encodedText = searchText.addingPercentEncoding(
+            withAllowedCharacters: .urlQueryAllowed
+        ) else { return }
+```
+searchText を URL で使える文字列に変換しています。
+
+例えば、検索文字が日本語や空白を含むと、そのままURLに入れると危ないことがあります。そのため、URL用に変換しています。
+
+guard let を使う理由
+
+もし nil のまま次へ進むと、URL文字列が作れません。だから、
+変換できなかったらここで処理を終わるようにしています。
+
+```swift
+guard let url = URL(string: urlString) else { return }
+```
+文字列から URL オブジェクトを作っています。でも、文字列が正しいURL形式でなければ URL(string:) は失敗して nil になります。
+
+URLが作れないのにこのあとを実行することはできません。だから、URLがないならその時点で止めています。
+
+guard let を使わないとどうなる？
+
+- エラーになる
+- クラッシュする可能性あり
+- コードが読みにくくなる
+
+「guard let = nilだったら即終了して、安全に値を使うためのもの」「Optionalを安全にアンラップして、nilの場合は早期リターンするために使います」
 
 
 （どんな質問が良い質問だったか。生成AIの回答で間違いや不正確な部分はあったか。次回はどんな質問をしてみたいか。）
