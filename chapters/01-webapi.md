@@ -151,51 +151,81 @@ struct SongRow: View {
 iTunes Search APIを使って、音楽（曲）を検索し、結果をリスト表示するアプリです。
 ```
 ## コードの詳細解説
-```markdown
-```
+
 ### データモデル（Codable構造体）
 
 ```swift
 struct SearchResponse: Codable {
     let results: [Song]
 }
-```
 
-**何をしているか：** 
-```markdown
-APIから返ってくる 全体のJSON を表しています。
-iTunes Search API は、だいたいこういうJSONを返します。
-```
-```json
-{
-  "results": [
-    {
-      "trackId": 123,
-      "trackName": "AAA",
-      "artistName": "BBB",
-      "artworkUrl100": "https://...",
-      "previewUrl": "https://..."
-    }
-  ]
+struct Song: Codable, Identifiable {
+    let trackId: Int
+    let trackName: String
+    let artistName: String
+    let artworkUrl100: String
+    let previewUrl: String?
+    
+    var id: Int { trackId }
 }
 ```
 
+**何をしているか：**
+
+APIから返ってきたJSONデータを、Swiftで使える形に変換するための設計図
+
+つまり：
+
+API → JSON（文字のデータ）
+
+Swift → struct（型）
+
+この2つをつなぐのが「データモデル」
+
 **なぜこう書くのか：**
-```markdown
+
 APIのデータの形に合わせて書いているから。
+
 曲は「results」の中に入っている。
+
 resultsの中に曲の配列があります。
+
 箱の中に物が入っている
+
 箱 → SearchResponse
+
 中身 → results
+
 物 → Song
+
+理由①：JSONをそのまま使えない
+
+理由②：JSONDecoderとセットで使う
+
+理由③：安全にデータを扱える
+
+APIから来る　JSONを　自動で　Swiftの型に変換するため
+```swift
+let response = try JSONDecoder().decode(SearchResponse.self, from: data)
 ```
+これが成立するのは Codable があるから
+
+
 
 **もしこう書かなかったら：**
-```markdown
+
 箱を無視して中身を取ろうとする。
-データが正しく読み取れない（＝アプリが動かない or エラーになる））
+
+データが正しく読み取れない（＝アプリが動かない or エラーになる）
+
+JSONを変換できない
+
+つまり
+```swift
+JSONDecoder().decode(...)
 ```
+がエラーになる
+
 ---
 
 ### API通信の処理
