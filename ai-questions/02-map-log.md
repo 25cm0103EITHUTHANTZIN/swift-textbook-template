@@ -115,3 +115,18 @@ center:　地図の中心地点
 
 span:　どれくらい広く表示するか
 
+### Q7
+
+**質問：**
+
+@State private var selectedLandmark: Landmark?　で　？はなんでつけていたか。
+
+**AIの回答の要点：**
+
+「Landmarkかもしれないし、nilかもしれない」から。Optional型
+
+**自分の理解：**
+
+「未選択状態」があるかもしれないから。
+
+var selectedLandmark: Landmark　だと：　最初からLandmark必要。でもまだ選択してないならエラー。
