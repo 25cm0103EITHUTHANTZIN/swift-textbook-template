@@ -130,3 +130,28 @@ span:　どれくらい広く表示するか
 「未選択状態」があるかもしれないから。
 
 var selectedLandmark: Landmark　だと：　最初からLandmark必要。でもまだ選択してないならエラー。
+
+### Q7
+
+**質問：**
+
+Setとはなんですか。
+
+**AIの回答の要点：**
+
+「重複しないデータの集まり」です。　
+
+カテゴリ選択は：同じカテゴリを2回選ぶ必要がないから。
+
+allCasesとは？ Landmark.Category.allCases
+
+意味 ->「Categoryの全case」
+
+```swift
+enum Category: CaseIterable
+```
+ここで　→　CaseIterable　「全部取得できる機能」が買いてあります。
+
+なぜ最初にallCases？　
+
+アプリ起動時：　全部表示したい
