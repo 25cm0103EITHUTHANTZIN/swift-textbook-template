@@ -155,3 +155,5 @@ enum Category: CaseIterable
 なぜ最初にallCases？　
 
 アプリ起動時：　全部表示したい
+
+
