@@ -295,42 +295,243 @@ item.loadTransferable(type: Data.self)
 ### 画像の非同期読み込み
 
 ```swift
-// 該当部分のコードを抜粋して貼る
+func loadImage(from item: PhotosPickerItem?) async {
+    guard let item = item else { return }
+    
+    do {
+        if let data = try await item.loadTransferable(type: Data.self),
+           let uiImage = UIImage(data: data) {
+            selectedImage = Image(uiImage: uiImage)
+        }
+    } catch {
+        print("画像の読み込みに失敗: \(error.localizedDescription)")
+    }
+}
 ```
 
 **何をしているか：**
 
+このコードは、PhotosPickerで選択された画像データを非同期で読み込み、SwiftUIの Image として画面に表示する処理を行っている。
+
+流れとしては、
+
+- PhotosPickerItem を受け取る
+- loadTransferable() で画像データを取得する
+- UIImage に変換する
+- selectedImage に保存する
+- 画面が自動更新される
+
+という動きになっている。
+
 **なぜこう書くのか：**
 
+画像データの取得は時間がかかる可能性があるため、非同期処理 (async / await) を使う必要がある。
+
+フォトライブラリ内の画像は、
+
+- サイズが大きい
+- iCloudからダウンロードされる場合がある
+- 読み込みに時間がかかる
+
+などの理由がある。
+
+そのため、async await を使い、UIを止めずに安全に画像を読み込んでいる。
+
+また、
+```swift
+guard let item = item else { return }
+```
+としている理由は、画像未選択状態で処理が実行されるのを防ぐためである。
+
+もし nil のまま読み込みをすると、クラッシュやエラーの原因になる。
+
+```swift
+do {
+    ...
+} catch {
+    ...
+}
+```
+を使うことで、読み込み失敗時にもアプリが落ちず、エラー内容だけを表示できるようにしている。
+
 **もしこう書かなかったら：**
+
+① await を書かなかった場合
+
+item.loadTransferable(type: Data.self) は非同期関数なので、await を付けないとコンパイルエラーになる。
+
+Swiftは、「時間がかかる処理なので待機が必要です」と判断するためである。
+
+② guard let item = item を書かなかった場合
+
+item が nil の可能性を考慮できず、
+
+- クラッシュ
+- Optional関連エラー
+
+などが発生する可能性がある。
+
+③ UIImage(data:) を使わなかった場合
+
+Data型 のままでは画像表示できない。
+
+つまり、
+
+```swift
+selectedImage = Image(...)
+```
+へ直接渡せないため、画面に画像を表示できなくなる。
 
 ---
 
 ### UIViewControllerRepresentableによるカメラ連携
 
 ```swift
-// 該当部分のコードを抜粋して貼る
+struct CameraView: UIViewControllerRepresentable {
+    @Binding var capturedImage: UIImage?
+    @Environment(\.dismiss) private var dismiss
+    
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.sourceType = .camera
+        picker.delegate = context.coordinator
+        return picker
+    }
+    
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+}
 ```
 
 **何をしているか：**
 
+このコードは、SwiftUIの画面からUIKitの UIImagePickerController を使って、カメラ撮影画面を表示するための処理である。
+
+UIImagePickerController はSwiftUI専用の部品ではなく、UIKitの部品である。そのため、SwiftUIで直接使うことはできない。そこで UIViewControllerRepresentable を使い、UIKitの画面をSwiftUIの中で使える形に変換している。
+
+makeUIViewController の中では、カメラ用の UIImagePickerController を作成し、sourceType = .camera にすることでカメラ撮影モードにしている。
+
 **なぜこう書くのか：**
 
+SwiftUIには標準のカメラ撮影用ビューがないため、UIKitの UIImagePickerController を利用する必要がある。
+
+そのUIKitの画面をSwiftUIで表示するために、
+
+```swift
+UIViewControllerRepresentable
+```
+ を使っている。
+
+また、
+
+```swift
+@Binding var capturedImage: UIImage?
+```
+を使うことで、カメラで撮影した画像を ContentView 側へ渡せるようにしている。
+
 **もしこう書かなかったら：**
+
+UIViewControllerRepresentable を使わないと、SwiftUIの画面内で UIImagePickerController を表示できない。
+
+そのため、
+
+- カメラ画面を開けない
+- 撮影した画像をSwiftUIへ渡せない
+- fullScreenCover でカメラ画面を表示できない
+
+という問題が起きる。
 
 ---
 
 ### Coordinatorパターン
 
 ```swift
-// 該当部分のコードを抜粋して貼る
+func makeCoordinator() -> Coordinator {
+    Coordinator(self)
+}
+
+class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    let parent: CameraView
+    
+    init(_ parent: CameraView) {
+        self.parent = parent
+    }
+    
+    func imagePickerController(
+        _ picker: UIImagePickerController,
+        didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]
+    ) {
+        if let image = info[.originalImage] as? UIImage {
+            parent.capturedImage = image
+        }
+        parent.dismiss()
+    }
+    
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        parent.dismiss()
+    }
+}
 ```
 
 **何をしているか：**
 
+Coordinatorは、UIKit側で起きた操作結果をSwiftUI側へ伝える役割をしている。
+
+このアプリでは、カメラで写真を撮影したあと、
+
+```swift
+didFinishPickingMediaWithInfo
+```
+
+が呼ばれる。
+
+その中で、撮影された画像を取り出し、
+
+```swift
+parent.capturedImage = image
+```
+
+によって ContentView 側の capturedUIImage に渡している。
+
+また、撮影が終わったときやキャンセルしたときに、
+
+```swift
+parent.dismiss()
+```
+
+を呼び、カメラ画面を閉じている。
+
 **なぜこう書くのか：**
 
+UIKitの UIImagePickerController は、撮影完了やキャンセルなどの結果を delegate で受け取る仕組みになっている。
+
+SwiftUIにはdelegateの仕組みがそのまま存在しないため、SwiftUIとUIKitの間をつなぐ役として Coordinator を作る必要がある。
+
+つまり、Coordinatorは、
+
+UIKitのカメラ操作結果 → SwiftUIの状態変数
+
+へ変換する橋渡し役である。
+
 **もしこう書かなかったら：**
+
+Coordinatorを書かなかった場合、撮影はできても、撮影後の画像をSwiftUI側で受け取れない。
+
+また、
+
+- 撮影完了後に画面が閉じない
+- キャンセルしても戻れない
+- capturedImage に画像が入らない
+- selectedImage が更新されない
+
+という問題が起きる。
+
+特にこの部分がないと、
+
+```swift
+parent.capturedImage = image
+```
+
+が実行されないため、撮影した写真を画面に表示できない。
 
 ---
 
