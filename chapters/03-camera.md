@@ -208,13 +208,87 @@ PhotosPicker(selection: $selectedItem, matching: .images) {
 
 このコードは、iPhoneのフォトライブラリから写真を選択する機能を作っている。
 
+- @State private var selectedItem
+  → ユーザーが選択した写真情報を保存するための変数。
+- PhotosPicker
+  → 写真選択画面を表示するSwiftUIの部品。
+- selection: $selectedItem
+  → 選択された画像を selectedItem に自動保存する。
+- matching: .images
+  → 写真だけを選択できるように制限している。
+- .onChange(of: selectedItem)
+  → 写真が選ばれた瞬間を検知する。
+- Task { await loadImage(...) }
+  → 非同期処理で画像データを読み込み、画面へ表示する。
+
+つまり、
+
+1. ボタンを押す
+2. フォトライブラリが開く
+3. 写真を選ぶ
+4. selectedItem に保存される
+5. loadImage() が呼ばれる
+6. 画像が画面に表示される
+
+という流れになっている。
+
 
 
 **なぜこう書くのか：**
-（別の書き方ではなく、この書き方が選ばれている理由を説明する）
+
+PhotosPicker は、Appleが用意している新しい写真選択APIであり、SwiftUIと相性が良いからである。
+
+特に重要なのは、
+
+```swift
+.onChange(of: selectedItem)
+```
+
+PhotosPicker は「選択された瞬間」に自動で処理を実行してくれないため、自分で変化を監視する必要がある。
+
+```swift
+Task {
+    await loadImage(from: newItem)
+}
+```
+としている理由は、画像読み込みが非同期処理だからである。
+
+```swift
+item.loadTransferable(type: Data.self)
+```
+は時間がかかる可能性があるため、await を使って安全に読み込む必要がある。
+
+もし同期処理で無理やり読み込むと、画面が一時停止したり、アプリ操作が重くなる可能性がある。
 
 **もしこう書かなかったら：**
-（この部分を省略したり変えたりすると何が起きるか。実際に試した結果があればここに書く）
+
+① .onChange(of: selectedItem) を書かなかった場合
+
+写真を選択しても、loadImage(from:) が呼ばれないため、画像は表示されない。
+
+実際には、
+
+- フォトライブラリは開く
+- 写真選択もできる
+- しかし画面が変化しない
+
+という状態になる。
+
+② matching: .images を書かなかった場合
+
+画像以外のデータも選択対象になる可能性がある。
+
+例えば動画などを選べるようになり、UIImage(data:) で変換できずエラーになる場合がある。
+
+③ Task や await を使わなかった場合
+
+非同期処理が正しく動かず、
+
+- コンパイルエラー
+- UIフリーズ
+- 画像読み込み失敗
+
+などが発生する可能性がある。
 
 ---
 
