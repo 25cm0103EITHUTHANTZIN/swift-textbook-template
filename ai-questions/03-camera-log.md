@@ -2,17 +2,48 @@
 
 ## 使用した生成AIツール
 
-（例：ChatGPT 無料版 / Claude 無料版 / Gemini など）
+ChatGPT
 
 ## 質問と回答の記録
 
 ### Q1
 
 **質問：**
-（生成AIに聞いた質問をそのまま書く）
+
+Struct　とはなんですか。
 
 **AIの回答の要点：**
-（長い回答の場合、要点だけ自分の言葉でまとめる）
+
+struct（Structure / 構造体）とは、「データ」と「そのデータに関する機能」を1つにまとめるための型 です。
+
+SwiftUIでは画面そのものを struct で作る。
+
+**なぜclassではなくstructをよく使うの？**
+
+Structは　値そのものをコピーする
+
+Classは　同じデータを共有する
+
+- Struct = コピー型（値型）
+- Class  = 共有型（参照型）
+
+```swift
+struct User {
+    var name: String
+}
+var user1 = User(name: "EI")
+var user2 = user1
+```
+user1 と user2 は別物になる。
+
+変更してみる　→ user2.name = "Taro"
+
+結果：
+
+user1.name → "EI"
+user2.name → "Taro"　になる。
+
+なぜ？→ コピーされたから。
 
 **自分の理解：**
 （回答を受けて自分がどう理解したか。納得できたか、さらに疑問が生まれたか）
