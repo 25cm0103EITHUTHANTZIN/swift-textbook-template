@@ -187,7 +187,7 @@ CameraView
 
 @Binding は、「親ViewのStateを、子Viewから直接操作するための仕組み」。
 
-### Q3
+### Q4
 
 **質問：**
 
@@ -218,3 +218,28 @@ onChange.....{-,   in }とはなんですか。なんでこのように書いて
 selectedItem が変わったら、新しい値(newItem)を使って処理する
 
 ***in は何？***  { 引数 in の in は、 「ここから処理を書きます」 という区切り。
+
+### Q4
+
+**質問：**
+
+@Environment とはなんですか
+
+**AIの回答の要点：**
+
+@Environment とは、SwiftUIが用意している「アプリ全体の共有情報」を取り出す仕組み です。
+
+```swift
+@Environment(\.dismiss) private var dismiss
+```
+dismiss() を呼ぶと：現在開いている画面を閉じることができる。
+
+SwiftUIでは、画面自身が自分を閉じる 場面が多い。
+
+例えば：
+- Sheet
+- fullScreenCover
+- Navigation
+- Popoverなど。
+
+その時： dismiss() で閉じられる。
