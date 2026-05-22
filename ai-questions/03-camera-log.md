@@ -187,6 +187,34 @@ CameraView
 
 @Binding は、「親ViewのStateを、子Viewから直接操作するための仕組み」。
 
-## 今日の質問を振り返って
+### Q3
 
-（どんな質問が良い質問だったか。生成AIの回答で間違いや不正確な部分はあったか。次回はどんな質問をしてみたいか。）
+**質問：**
+
+onChange.....{-,   in }とはなんですか。なんでこのように書いていますか。文法を説明お願いします。
+
+**AIの回答の要点：**
+
+「selectedItem が変化したら実行してください」という意味。
+
+基本形は：
+```swift
+{ 引数 in
+    実行処理
+}
+```
+***onChangeは何を渡している？***  onChange は実は、「変更前の値」と「変更後の値」を渡してくれる。
+
+```swift
+.onChange(of: selectedItem) { oldValue, newValue in
+```
+が本来の形。
+
+***_ は何？***  _は、「この値は使いません」という意味。
+
+```swift
+.onChange(of: selectedItem) { _, newItem in
+```
+selectedItem が変わったら、新しい値(newItem)を使って処理する
+
+***in は何？***  { 引数 in の in は、 「ここから処理を書きます」 という区切り。
