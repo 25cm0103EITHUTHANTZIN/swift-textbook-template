@@ -243,3 +243,47 @@ SwiftUIでは、画面自身が自分を閉じる 場面が多い。
 - Popoverなど。
 
 その時： dismiss() で閉じられる。
+
+### Q5
+
+**質問：**
+
+PhotosPicker(selection: $selectedItem, matching: .images)　で　matching は何をする。
+
+**AIの回答の要点：**
+
+matching: は、「どんな種類のデータを選択できるかを制限する設定」 です。
+
+もしmatchingを書かなかったら？
+
+写真だけではなく、
+- 動画
+- Live Photo
+- その他メディア なども選べる可能性がある。
+
+### Q6
+
+**質問：**
+
+CameraView(capturedImage: $capturedUIImage) で 何が何を渡す？つまり左側から右？右側から左？？
+
+**AIの回答の要点：**
+
+CameraView(capturedImage: $capturedUIImage) は、
+
+右側の capturedUIImage を 左側の capturedImage に渡している
+
+***分解して見る***
+
+capturedImage: → これは、CameraView側の引数名 です。
+
+つまり：
+
+struct CameraView　の中にある　→  @Binding var capturedImage: UIImage?　　のこと。
+
+$capturedUIImage　→ これは、ContentView　側の @State。
+
+@State private var capturedUIImage: UIImage?　　これをBindingとして渡している。
+
+
+
