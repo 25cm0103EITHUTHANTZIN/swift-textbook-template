@@ -25,6 +25,4 @@
 
 ## 相手のリポジトリに書いたIssueのURL
 
-（GitHubのIssueとして投稿したフィードバックのURL）
-
-https://github.com/...
+https://github.com/25cm0109-OD/swift-textbook-template/issues/3
