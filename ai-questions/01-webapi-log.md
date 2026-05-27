@@ -140,6 +140,7 @@ func searchMusic() async {
         let urlString = "https://itunes.apple.com/search?term=\(encodedText)&media=music&country=jp&limit=25"
         
         guard let url = URL(string: urlString) else { return }
+```
 
 ここでなんでguard letを使うの？
 
@@ -147,7 +148,6 @@ guard letを使わないとどうなるの？
 
 guard letの使う方法や、どんな場合に使うべきかを詳しくせつめいしてください!
 
-```
 
 **AIの回答の要点：**
 
