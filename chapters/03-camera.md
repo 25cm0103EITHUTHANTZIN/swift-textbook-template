@@ -558,17 +558,303 @@ parent.capturedImage = image
 
 ## 自分の実験メモ
 
-（模範コードを改変して試したことを書く）
+```swift
+// SwiftUIを使うためのフレームワーク
+import SwiftUI
+
+// PhotosPickerを使うためのフレームワーク
+import PhotosUI
+
+// メイン画面
+struct ContentView: View {
+    
+    // 選択されたPhotosPickerItemを保存
+    @State private var selectedItem: PhotosPickerItem?
+    
+    // 画面表示用の画像
+    @State private var selectedImage: Image?
+    
+    // カメラ画面表示管理
+    @State private var isShowingCamera = false
+    
+    // カメラ撮影後のUIImage
+    @State private var capturedUIImage: UIImage?
+    
+    var body: some View {
+        
+        NavigationStack {
+            
+            VStack(spacing: 20) {
+                
+                // 画像表示エリア
+                imageDisplayArea
+                
+                // ボタンエリア
+                HStack(spacing: 20) {
+                    
+                    // =========================
+                    // 実験1：
+                    // matching: .images を削除
+                    // =========================
+                    // 元：
+                    // PhotosPicker(selection: $selectedItem, matching: .images)
+                    
+                    PhotosPicker(selection: $selectedItem) {
+                        Label("ライブラリ", systemImage: "photo.on.rectangle")
+                    }
+                    .buttonStyle(.bordered)
+                    
+                    // カメラボタン
+                    Button {
+                        
+                        // カメラ画面を表示
+                        isShowingCamera = true
+                        
+                    } label: {
+                        Label("カメラ", systemImage: "camera")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    
+                    // カメラ未対応端末では無効化
+                    .disabled(!UIImagePickerController.isSourceTypeAvailable(.camera))
+                }
+                .padding()
+            }
+            .navigationTitle("写真アプリ")
+            
+            // =========================
+            // 実験2：
+            // onChange をコメントアウト
+            // =========================
+            
+//            .onChange(of: selectedItem) { _, newItem in
+//                Task {
+//                    await loadImage(from: newItem)
+//                }
+//            }
+            
+            // カメラ画面表示
+            .fullScreenCover(isPresented: $isShowingCamera) {
+                
+                // CameraViewへBindingを渡す
+                CameraView(capturedImage: $capturedUIImage)
+            }
+            
+            // 撮影後画像の変化を監視
+            .onChange(of: capturedUIImage) { _, newImage in
+                
+                // =========================
+                // 実験5：
+                // if let を削除するとエラー
+                // =========================
+                
+                if let uiImage = newImage {
+                    
+                    // UIImage → SwiftUI Imageへ変換
+                    selectedImage = Image(uiImage: uiImage)
+                }
+                
+//                selectedImage = Image(uiImage: newImage)
+                // ↑ Optionalなのでエラーになる
+            }
+        }
+    }
+    
+    // MARK: - 画像表示エリア
+    
+    @ViewBuilder
+    private var imageDisplayArea: some View {
+        
+        // 画像が存在する場合
+        if let image = selectedImage {
+            
+            image
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(maxHeight: 400)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .shadow(radius: 4)
+                .padding()
+            
+        } else {
+            
+            // 画像未選択時
+            RoundedRectangle(cornerRadius: 16)
+                .fill(.gray.opacity(0.1))
+                .frame(height: 300)
+                .overlay {
+                    
+                    VStack(spacing: 8) {
+                        
+                        Image(systemName: "photo")
+                            .font(.system(size: 48))
+                            .foregroundStyle(.gray)
+                        
+                        Text("写真を選択または撮影してください")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .padding()
+        }
+    }
+    
+    // MARK: - 画像読み込み
+    
+    func loadImage(from item: PhotosPickerItem?) async {
+        
+        // nilチェック
+        guard let item = item else { return }
+        
+        do {
+            
+            // 非同期で画像データ取得
+            if let data = try await item.loadTransferable(type: Data.self),
+               
+                // Data → UIImage変換
+               let uiImage = UIImage(data: data) {
+                
+                // UIImage → SwiftUI Image
+                selectedImage = Image(uiImage: uiImage)
+            }
+            
+        } catch {
+            
+            // エラー表示
+            print("画像の読み込みに失敗: \(error.localizedDescription)")
+        }
+    }
+}
+
+// MARK: - カメラビュー
+
+struct CameraView: UIViewControllerRepresentable {
+    
+    // =========================
+    // 実験4：
+    // @Binding を外すと親View更新されない
+    // =========================
+    
+    @Binding var capturedImage: UIImage?
+    
+//    var capturedImage: UIImage?
+    // ↑ これだと値共有できない
+    
+    // 画面閉じる機能
+    @Environment(\.dismiss) private var dismiss
+    
+    // UIKitのViewController生成
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        
+        let picker = UIImagePickerController()
+        
+        // =========================
+        // 実験3：
+        // .camera → .photoLibrary
+        // =========================
+        
+//        picker.sourceType = .camera
+        
+        picker.sourceType = .photoLibrary
+        
+        // delegate設定
+        picker.delegate = context.coordinator
+        
+        return picker
+    }
+    
+    // 状態更新時処理
+    func updateUIViewController(
+        _ uiViewController: UIImagePickerController,
+        context: Context
+    ) {}
+    
+    // Coordinator生成
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
+    // delegate処理クラス
+    class Coordinator: NSObject,
+                       UIImagePickerControllerDelegate,
+                       UINavigationControllerDelegate {
+        
+        // 親View保存
+        let parent: CameraView
+        
+        // 初期化
+        init(_ parent: CameraView) {
+            self.parent = parent
+        }
+        
+        // 撮影完了時
+        func imagePickerController(
+            _ picker: UIImagePickerController,
+            didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]
+        ) {
+            
+            // UIImage取得
+            if let image = info[.originalImage] as? UIImage {
+                
+                // 親Viewへ画像渡す
+                parent.capturedImage = image
+            }
+            
+            // 画面閉じる
+            parent.dismiss()
+        }
+        
+        // キャンセル時
+        func imagePickerControllerDidCancel(
+            _ picker: UIImagePickerController
+        ) {
+            
+            // 画面閉じる
+            parent.dismiss()
+        }
+    }
+}
+
+// プレビュー
+#Preview {
+    ContentView()
+}
+```
 
 **実験1：**
-- やったこと：
-- 結果：
-- わかったこと：
+- やったこと：　matching: .images を削除して、PhotosPickerで画像以外も選択できる状態にした。
+- 結果：　フォトライブラリは開いたが、画像以外のデータも選択対象になった。
+- わかったこと：　matching: .images は「画像だけを選択可能にする」役割があると分かった。これがあることで、UIImageへ安全に変換できている。
 
 **実験2：**
-- やったこと：
-- 結果：
-- わかったこと：
+- やったこと：　.onChange(of: selectedItem) の部分をコメントアウトした。
+- 結果：　写真は選択できたが、画面に画像が表示されなかった。
+- わかったこと：　.onChange が、写真選択後に loadImage() を実行する役割をしていると分かった。この処理がないと、画像読み込みが行われず、画面表示も更新されない。
+
+**実験3：**
+- やったこと： picker.sourceType = .camera を .photoLibrary に変更した。
+- 結果： カメラ画面ではなく、フォトライブラリ画面が表示された。
+- わかったこと： sourceType によって、UIImagePickerControllerが「カメラを開くか」「フォトライブラリを開くか」を切り替えていることが分かった。
+
+**実験4：**
+- やったこと： @Binding var capturedImage を普通の変数に変更した。
+- 結果： 撮影自体はできたが、撮影後に画像が画面へ表示されなかった。
+- わかったこと： @Binding は親Viewと子Viewで同じ状態を共有するために必要だと分かった。普通の変数にすると、CameraView内だけ値が変わり、ContentView側は更新されなかった。
+
+**実験5：**
+- やったこと： if let uiImage = newImage を削除した。
+- 結果： コンパイルエラーになった。
+- わかったこと： newImage は Optional型 (UIImage?) のため、nilの可能性を考慮して安全に取り出す必要があると分かった。
+
+**実験6：**
+- やったこと： .disabled(!UIImagePickerController.isSourceTypeAvailable(.camera)) を削除した。
+- 結果： シミュレータでもカメラボタンが押せるようになったが、実際にはカメラ機能が存在しないため正常に動作しなかった。
+- わかったこと： .disabled() は、使えない機能を事前に無効化し、ユーザーの誤操作を防ぐ役割があると分かった。
+
+**実験7：**
+- やったこと： .aspectRatio(contentMode: .fit) を削除した。
+- 結果：画像サイズが崩れたり、一部が伸びて表示された。
+- わかったこと： .aspectRatio() は画像の縦横比を維持するために重要だと分かった。これがないと、画像が不自然に変形する場合がある。
 
 ## AIに聞いて特に理解が深まった質問 TOP3
 
