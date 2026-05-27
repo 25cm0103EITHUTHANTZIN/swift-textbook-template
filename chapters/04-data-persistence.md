@@ -5,9 +5,9 @@
 
 ## この章で学ぶこと
 
-（この章で扱うトピックの概要を2〜3行で書く。自分の言葉で。）
+この章で学ぶことは、大きく分けて 「データを保存する方法」 です。
+特に、SwiftUIでよく使う AppStorage と SwiftData を使って、「アプリを閉じてもデータを残す方法」を学びます。
 
-例：この章では、AppStorageとSwiftDataを使ってアプリのデータを端末に永続的に保存する方法を学ぶ。具体的にはSwiftDataを使ったメモアプリを題材として、@Modelでデータモデルを定義し、modelContextを使ったデータ操作、@Queryによる動的なデータ取得、そして@AppStorageによるユーザー設定の保存を実装する。
 
 ## 模範コードの全体像
 
@@ -259,70 +259,260 @@ struct SettingsView: View {
 
 **このアプリは何をするものか：**
 
-（アプリの動作を自分の言葉で説明する。スクリーンショットを貼ってもよい。）
+このアプリは、メモを保存・管理するためのメモ帳アプリです。
+
+ユーザーはメモの追加・編集・削除ができ、お気に入り登録や並び替えも行えます。
+
+また、AppStorage を使ってユーザー設定を保存し、SwiftData を使ってメモデータを永続化することで、アプリを閉じてもデータが保持される仕組みを学ぶアプリです。
 
 ## コードの詳細解説
 
 ### SwiftDataモデル（@Model）
 
 ```swift
-// 該当部分のコードを抜粋して貼る
+@Model
+class Memo {
+    var title: String
+    var content: String
+    var createdAt: Date
+    var isFavorite: Bool
+    
+    init(title: String, content: String, createdAt: Date = .now, isFavorite: Bool = false) {
+        self.title = title
+        self.content = content
+        self.createdAt = createdAt
+        self.isFavorite = isFavorite
+    }
+}
 ```
 
 **何をしているか：**
-（この部分が果たしている役割を説明する）
+
+Memo は、1件分のメモデータを表すモデルです。
+
+タイトル、内容、作成日、お気に入り状態を保存します。
+
+@Model を付けることで、SwiftDataがこのクラスをデータベースに保存できる形として扱います。
 
 **なぜこう書くのか：**
-（別の書き方ではなく、この書き方が選ばれている理由を説明する）
+
+SwiftDataでは、保存したいデータの形を @Model 付きのクラスで定義します。
+
+これにより、Memo のデータを追加・取得・編集・削除できるようになります。
+
+また、createdAt や isFavorite に初期値を入れておくことで、新しいメモを作るときに毎回すべての値を書かなくてもよくなります。
 
 **もしこう書かなかったら：**
-（この部分を省略したり変えたりすると何が起きるか。実際に試した結果があればここに書く）
+
+@Model を付けないと、SwiftDataの保存対象として認識されません。
+
+そのため、@Query でメモ一覧を取得したり、modelContext.insert() で保存したりできなくなります。
+
+また、init がないと、メモを作成するときに必要な値を正しくセットできず、追加処理が書きにくくなります。
 
 ---
 
 ### データの追加・削除（modelContext）
 
 ```swift
-// 該当部分のコードを抜粋して貼る
+@Environment(\.modelContext) private var modelContext
+
+let memo = Memo(title: title, content: content)
+modelContext.insert(memo)
+
+func deleteMemos(at offsets: IndexSet) {
+    for index in offsets {
+        let memo = displayedMemos[index]
+        modelContext.delete(memo)
+    }
+}
 ```
 
 **何をしているか：**
 
+modelContext を使って、SwiftDataのデータを追加・削除しています。
+
+- insert(memo)
+  
+  → 新しいメモを保存する
+- delete(memo)
+  
+  → 保存済みのメモを削除する
+
+という役割があります。
+
+このコードでは、ユーザーが入力したタイトルと内容から Memo オブジェクトを作成し、SwiftDataに保存しています。
+
+また、Listでスワイプ削除したメモをデータベースから消しています。
+
 **なぜこう書くのか：**
 
+SwiftDataでは、データ管理を modelContext が担当しているためです。
+
+```swift
+@Environment(\.modelContext)
+```
+を使うことで、SwiftUI環境からSwiftDataの管理機能を受け取っています。
+
+そして、
+```swift
+modelContext.insert(memo)
+```
+を書くことで、「このメモを保存してください」 とSwiftDataへ指示しています。
+
+削除も同じで、
+
+```swift
+modelContext.delete(memo)
+```
+によって、「このデータを削除してください」 と伝えています。
+
 **もしこう書かなかったら：**
+
+insert() を書かなかった場合、メモオブジェクトは作成されても保存されません。
+
+そのため：
+
+- 一覧に表示されない
+- アプリ再起動後に消える
+
+状態になります。
+
+また、
+
+```swift
+@Environment(\.modelContext)
+```
+を書かなければ、modelContext 自体が使えないため、 modelContext.insert() や modelContext.delete() でエラーになります。
+
+さらに、delete() を使わない場合は、画面から消えてもSwiftData内にはデータが残り続けます。
 
 ---
 
 ### @Queryによるデータ取得
 
 ```swift
-// 該当部分のコードを抜粋して貼る
+@Query(sort: \Memo.createdAt, order: .reverse)
+private var memos: [Memo]
 ```
 
 **何をしているか：**
 
+@Query を使って、SwiftDataに保存されている Memo データを取得しています。
+
+このコードでは：
+
+- Memo を取得する
+- createdAt（作成日時）で並び替える
+- .reverse によって新しい順に表示する
+
+という処理をしています。
+
+取得したデータは memos 配列に入り、List表示などで使われます。
+
 **なぜこう書くのか：**
 
+@Query を使うことで、SwiftDataのデータを自動で監視できるためです。
+
+例えば：
+
+- メモを追加
+- メモを削除
+- メモを編集
+
+すると、memos が自動更新され、画面も自動で再描画されます。
+
+つまり、「データ変更 → 画面更新」 を自動化できます。
+
+また、 sort: \Memo.createdAt  を書くことで、作成日時順に並び替えています。
+
+さらに、order: .reverse によって、新しいメモを上に表示しています。
+
 **もしこう書かなかったら：**
+
+@Query を使わない場合、SwiftDataからデータを取得できません。
+
+そのため：
+
+- Listに何も表示されない
+- 保存済みメモを読み込めない
+
+状態になります。
+
+また、並び替えを書かなかった場合は、表示順が不安定になることがあります。
+
+さらに、@Query の自動更新が無いと、
+
+- 手動で再読み込みを書く
+- 画面更新処理を書く
+
+必要が出てきて、コードがかなり複雑になります。
 
 ---
 
 ### @AppStorageによる設定保存
 
 ```swift
-// 該当部分のコードを抜粋して貼る
+@AppStorage("sortByFavorite") private var sortByFavorite: Bool = false
+@AppStorage("userName") private var userName: String = ""
+
+Toggle("お気に入りを上に表示", isOn: $sortByFavorite)
+
+TextField("あなたの名前", text: $userName)
 ```
 
 **何をしているか：**
 
+@AppStorage を使って、アプリの設定値を保存しています。
+
+このコードでは：
+
+- userName → ユーザー名を保存
+- sortByFavorite → お気に入り優先表示のON/OFFを保存
+
+しています。
+
+設定した値は、アプリを閉じても消えず、次回起動時にも保持されます。
+
 **なぜこう書くのか：**
+
+@AppStorage は、簡単な設定値を保存するのに便利だからです。
+
+例えば：
+
+- 名前
+- ダークモード設定
+- ON/OFF設定
+- 音量設定
+
+などの小さいデータ保存に向いています。
+
+また、 @AppStorage("userName") の "userName" は保存キーになっています。
+
+これによって、「この名前でデータを保存してください」とシステムへ伝えています。
+
+さらに、@State と似た書き方で使えるため、TextField(..., text: $userName) のようにUIと簡単に連携できます。
 
 **もしこう書かなかったら：**
 
----
+@AppStorage を使わずに @State だけで書いた場合、
 
-（必要に応じてセクションを増やす）
+@State private var userName = ""
+
+アプリを終了した瞬間にデータが消えます。
+
+つまり：
+
+- 毎回名前を入力し直す
+- 設定が保存されない
+
+状態になります。
+
+また、保存機能を自分で実装する必要があり、コードが複雑になります。
+
+さらに、保存キー（"userName" など）が重複すると、別データが上書きされる可能性もあります。
+
+---
 
 ## 新しく学んだSwiftの文法・API
 
