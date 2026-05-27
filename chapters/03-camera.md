@@ -541,11 +541,20 @@ parent.capturedImage = image
 
 | 項目 | 説明 | 使用例 |
 |------|------|--------|
-| 例：`PhotosPicker` | フォトライブラリから画像を選択するコンポーネント | `PhotosPicker(selection: $selectedItem, matching: .images)` |
-| 例：`UIImagePickerController` | カメラまたはフォトライブラリにアクセスするUIKitコンポーネント | `picker.sourceType = .camera` |
-| | | |
-| | | |
-| | | |
+| `PhotosPicker` | フォトライブラリから画像を選択するコンポーネント | `PhotosPicker(selection: $selectedItem, matching: .images)` |
+| `UIImagePickerController` | カメラまたはフォトライブラリにアクセスするUIKitコンポーネント | `picker.sourceType = .camera` |
+| `@State`| View内で状態を保持し、値が変わると画面を再描画する| `@State private var selectedImage: Image?`|
+| `@Binding`|親Viewの状態を子Viewから共有・変更するための仕組み |`@Binding var capturedImage: UIImage?` |
+| `@Environment`| SwiftUIの環境情報を取得する仕組み| `@Environment(\.dismiss)`|
+| `@ViewBuilder`|条件によって複数のViewを切り替えて返せるようにする | `@ViewBuilder private var imageDisplayArea`|
+| `NavigationStack`| 画面遷移やナビゲーションタイトルを管理するSwiftUIコンテナ| `NavigationStack { ... }`|
+| `.onChange`| 値が変化したタイミングで処理を実行する| .onChange(of: selectedItem)|
+| `Task`| 非同期処理を開始するための仕組み | `Task { await loadImage(...) }`|
+| `async / await`| 非同期処理を安全に待機しながら実行する文法| `func loadImage(...) async`|
+|`loadTransferable()` |PhotosPickerから画像データを取得するAPI |`item.loadTransferable(type: Data.self)` |
+| `guard let`| nilチェックを行い、安全に値を取り出す| `guard let item = item else { return }`|
+| `if let`| Optional型に値がある場合だけ安全に使う|`if let uiImage = newImage` |
+
 
 ## 自分の実験メモ
 
