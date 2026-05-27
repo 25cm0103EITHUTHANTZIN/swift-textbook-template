@@ -119,7 +119,7 @@ span:　どれくらい広く表示するか
 
 **質問：**
 
-@State private var selectedLandmark: Landmark?　で　？はなんでつけていたか。
+@State private var selectedLandmark: Landmark?　で　？  はなんでつけていたか。
 
 **AIの回答の要点：**
 
