@@ -289,11 +289,62 @@ Group は： SwiftUIのViewを整理するため
             }
 ```
 この部分を使う方法や、なんで使ったかを詳しく説明お願いします。
-### Q3
+
+**AIの回答の要点：**
+
+- 左上：設定ボタン ⚙️
+- 右上：追加ボタン ＋　を表示してます。
+
+1. .toolbar
+
+    これは、画面上部にボタンなどを置くため に使います。 特に NavigationStack の中でよく使います。
+
+2. ToolbarItem
+
+    これは、toolbarの中に置く1つの部品です。placement は どこに置くか です。
+
+.topBarLeading → これは 左上 です。
+
+.topBarTrailing　→ これは 右上 です。
+
+流れまとめ
+
+歯車ボタンを押す　→　isShowingSettings = true　 →　SettingsView が表示される
+
+＋ボタンを押す　→　isShowingAddSheet = true　→　MemoAddView が表示される
+
+### Q7
 
 **質問：**
 
+```swift
+#Preview {
+    ContentView()
+    // プレビューだけで使う仮のSwiftData保存場所
+        .modelContainer(for: Memo.self, inMemory: true)
+}
+```
+このコードはなんですか。なぜ .modelContainer が必要？
 
+**AIの回答の要点：**
+
+ContentView では SwiftDataを使っています。
+
+だからPreviewでも、SwiftDataの保存場所を用意する必要があります。
+
+for: Memo.self　→　Memoというモデルを保存できる場所を作るという意味です。
+
+つまり、Previewの中で　Memo　を使えるようにしています。
+
+inMemory: true　→ これは、　一時的な保存場所を使う　という意味です。
+
+普通の保存ではなく、メモリ上だけに保存します。
+
+メモリ上だけとは？
+
+アプリを閉じたり、Previewを更新したら消えます。
+
+つまり：　本物のデータとして保存しない　です。
 
 ## 今日の質問を振り返って
 
