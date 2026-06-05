@@ -524,19 +524,10 @@ TextField("あなたの名前", text: $userName)
 | 例：`@AppStorage`| ユーザー設定を保存する | `@AppStorage("userName") var userName`|
 | 例：`@State`| View内で状態を管理する | `@State private var title = ""`|
 | 例：`@Binding`| 親Viewと子Viewでデータを共有する | `@Binding var userName: String`|
-| 例：``| | ``|
-| 例：``| | ``|
-| 例：``| | ``|
-| 例：``| | ``|
-| 例：``| | ``|
-| 例：``| | ``|
-| 例：``| | ``|
-| 例：``| | ``|
-| 例：``| | ``|
-| 例：``| | ``|
-| 例：``| | ``|
-| 例：``| | ``|
-| 例：``| | ``|
+| 例：`@Bindable`| SwiftDataモデルを直接編集可能にする | `@Bindable var memo: Memo`|
+| 例：`.sheet()`| モーダル画面を表示する | `.sheet(isPresented: $isShowingAddSheet)`|
+| 例：`.onDelete()`| Listのスワイプ削除を有効にする | `.onDelete(perform: deleteMemos)`|
+| 例：`.modelContainer()`| SwiftDataの保存領域を作る | `.modelContainer(for: Memo.self)`|
 
 ## 自分の実験メモ
 
