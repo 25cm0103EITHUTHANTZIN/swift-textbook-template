@@ -520,9 +520,23 @@ TextField("あなたの名前", text: $userName)
 |------|------|--------|
 | 例：`@Model` | SwiftDataでオブジェクトを永続化するためのマクロ | `@Model final class Memo { ... }` |
 | 例：`@Query` | データベースからデータを取得し、変更を自動で反映するプロパティラッパー | `@Query var memos: [Memo]` |
-| | | |
-| | | |
-| | | |
+| 例：`@Environment`| SwiftUI環境から値を取得する | `@Environment(\.modelContext)`|
+| 例：`@AppStorage`| ユーザー設定を保存する | `@AppStorage("userName") var userName`|
+| 例：`@State`| View内で状態を管理する | `@State private var title = ""`|
+| 例：`@Binding`| 親Viewと子Viewでデータを共有する | `@Binding var userName: String`|
+| 例：``| | ``|
+| 例：``| | ``|
+| 例：``| | ``|
+| 例：``| | ``|
+| 例：``| | ``|
+| 例：``| | ``|
+| 例：``| | ``|
+| 例：``| | ``|
+| 例：``| | ``|
+| 例：``| | ``|
+| 例：``| | ``|
+| 例：``| | ``|
+| 例：``| | ``|
 
 ## 自分の実験メモ
 
