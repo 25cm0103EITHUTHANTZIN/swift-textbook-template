@@ -617,18 +617,9 @@ modelContext.insert(record)
 | 例：`CLLocationCoordinate2D`| 緯度・経度を表す構造体 | CLLocationCoordinate2D(latitude: latitude, longitude: longitude)|
 | 例：`Map`| 地図を表示するSwiftUIコンポーネント | Map(position: $cameraPosition) |
 | 例：`Annotation`| 地図上にカスタムマーカーを配置する | Annotation(record.title, coordinate: record.coordinate) |
-| 例：``| | |
-| 例：``| | |
-| 例：``| | |
-| 例：``| | |
-| 例：``| | |
-| 例：``| | |
-| 例：``| | |
-| 例：``| | |
-| 例：``| | |
-| 例：``| | |
-| 例：``| | |
-
+| 例：`guard let`| Optionalの安全な取り出し| guard let data = imageData else { return nil } |
+| 例：`計算プロパティ`| 値を保存せず計算して返すプロパティ | var coordinate: CLLocationCoordinate2D { ... } |
+| 例：`sheet`| モーダル画面を表示する | .sheet(isPresented: $isShowingAddSheet) |
 
 ## 自分の実験メモ
 
