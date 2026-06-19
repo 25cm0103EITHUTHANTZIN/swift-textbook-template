@@ -602,7 +602,6 @@ modelContext.insert(record)
 
 ---
 
-（必要に応じてセクションを増やす）
 
 ## 新しく学んだSwiftの文法・API
 
@@ -610,9 +609,26 @@ modelContext.insert(record)
 |------|------|--------|
 | 例：`TabView` | 複数のビューをタブで切り替えるコンポーネント | `TabView { ... }.tabViewStyle(.page)` |
 | 例：`CLLocationManager` | GPS位置情報を取得するAPIManager | `let location = manager.location?.coordinate` |
-| | | |
-| | | |
-| | | |
+| 例：`@Model`| SwiftDataでデータを保存するためのモデルを定義するマクロ | @Model class PhotoRecord { }|
+| 例：`@Observable`| クラスのプロパティ変更をSwiftUIへ通知するマクロ | @Observable class LocationManager { } |
+| 例：`@Environment`| SwiftUIの環境値を取得する | @Environment(\.modelContext) var modelContext|
+| 例：`@Query`| SwiftDataからデータを取得し、自動更新する | @Query private var records: [PhotoRecord] |
+| 例：`CLLocationManagerDelegate`| 位置情報の更新通知を受け取るためのプロトコル | class LocationManager: CLLocationManagerDelegate |
+| 例：`CLLocationCoordinate2D`| 緯度・経度を表す構造体 | CLLocationCoordinate2D(latitude: latitude, longitude: longitude)|
+| 例：`Map`| 地図を表示するSwiftUIコンポーネント | Map(position: $cameraPosition) |
+| 例：`Annotation`| 地図上にカスタムマーカーを配置する | Annotation(record.title, coordinate: record.coordinate) |
+| 例：``| | |
+| 例：``| | |
+| 例：``| | |
+| 例：``| | |
+| 例：``| | |
+| 例：``| | |
+| 例：``| | |
+| 例：``| | |
+| 例：``| | |
+| 例：``| | |
+| 例：``| | |
+
 
 ## 自分の実験メモ
 
