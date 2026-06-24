@@ -694,9 +694,17 @@ Image(systemName: "photo.artframe")
 |------|------|--------|
 | 例：`DragGesture` | ドラッグジェスチャーを認識するジェスチャーレコグナイザー | `.gesture(DragGesture().onChanged { ... })` |
 | 例：`MagnificationGesture` | ピンチジェスチャーで拡大・縮小を認識 | `.gesture(MagnificationGesture().onChanged { scale in ... })` |
-| | | |
-| | | |
-| | | |
+| 例：`NavigationStack`| 画面遷移を管理するコンテナ| `NavigationStack { List { ... } }` |
+| 例：`NavigationLink` | 別の画面へ遷移するリンク| `NavigationLink("ドラッグ") { DragDemoView() }` |
+| 例：`RotateGesture`| 2本指の回転操作を認識するジェスチャー| `.gesture(RotateGesture())`|
+| 例：`onTapGesture`| タップ時の処理を実行する| `.onTapGesture { tapCount += 1 }`|
+| 例：`onLongPressGesture`| 長押し時の処理を実行する | `.onLongPressGesture(minimumDuration: 1.0)`|
+| 例：`onChanged`| ジェスチャー中の変化を取得する | `.onChanged { value in ... }` |
+| 例：`onEnded`| ジェスチャー終了時の処理を実行する | `onEnded { _ in ... }`|
+| 例：`CGSize`| 横幅と縦幅、移動量を表す型 | `CGSize(width: 100, height: 50)`|
+| 例：`offset`| Viewの表示位置を移動する | `.offset(offset)`|
+| 例：`scaleEffect`| Viewを拡大・縮小する|`.scaleEffect(scale)` |
+| 例：`overlay`| Viewの上に別のViewを重ねる| `.overlay { Text("ドラッグ") }` |
 
 ## 自分の実験メモ
 
