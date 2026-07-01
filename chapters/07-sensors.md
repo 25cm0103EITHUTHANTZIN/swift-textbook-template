@@ -297,28 +297,96 @@ CMMotionManager は、CoreMotionでセンサーの情報を取得するための
 ### 歩数計（CMPedometer）
 
 ```swift
-// 該当部分のコードを抜粋して貼る
+private let pedometer = CMPedometer()
+var stepCount: Int = 0
+var distance: Double = 0
+
+isPedometerAvailable = CMPedometer.isStepCountingAvailable()
+
+pedometer.startUpdates(from: Date()) { [weak self] data, error in
+    guard let self = self, let data = data else { return }
+
+    DispatchQueue.main.async {
+        self.stepCount = data.numberOfSteps.intValue
+        if let dist = data.distance {
+            self.distance = dist.doubleValue
+        }
+    }
+}
 ```
 
 **何をしているか：**
 
+この部分では、iPhoneの歩数計センサーを利用して、歩数と歩行距離をリアルタイムで取得しています。
+
+CMPedometer を作成し、歩数計が利用できるか確認したあと、startUpdates() を実行すると歩き始めた時点から歩数や移動距離が自動的に更新されます。
+
+取得した値は stepCount と distance に保存され、画面へ表示されます。
+
 **なぜこう書くのか：**
 
+CMPedometer はiPhoneに搭載されている歩数計センサーの情報を取得するための専用クラスです。
+
+startUpdates(from:) を使うことで、指定した時刻から現在までの歩数や距離を継続して受け取ることができます。
+
+また、DispatchQueue.main.async を使ってメインスレッドで画面の値を更新することで、安全にUIへ反映できます。
+
 **もしこう書かなかったら：**
+
+CMPedometer を使用しなければ、歩数や歩行距離を取得することはできません。
+
+また、startUpdates() を呼ばない場合は歩いても歩数は更新されず、画面には常に0のまま表示されます。
 
 ---
 
 ### CoreLocationとの連携
 
 ```swift
-// 該当部分のコードを抜粋して貼る
+private let locationManager = CLLocationManager()
+
+override init() {
+    super.init()
+    locationManager.delegate = self
+    locationManager.desiredAccuracy = kCLLocationAccuracyBest
+    locationManager.requestWhenInUseAuthorization()
+}
+
+locationManager.startUpdatingLocation()
+
+func locationManager(
+    _ manager: CLLocationManager,
+    didUpdateLocations newLocations: [CLLocation]
+) {
+    guard let location = newLocations.last else { return }
+
+    currentSpeed = max(0, location.speed)
+    locations.append(location.coordinate)
+}
 ```
 
 **何をしているか：**
 
+この部分では、CoreLocationを利用して現在地や移動速度を取得しています。
+
+位置情報の利用許可をユーザーに求めたあと、startUpdatingLocation() を実行するとGPSから位置情報が送られてきます。
+
+取得した最新の位置情報から現在の速度を計算し、移動した場所を配列へ保存しています。
+
 **なぜこう書くのか：**
 
+CLLocationManager はiPhoneのGPSや位置情報サービスを利用するためのクラスです。
+
+位置情報を受け取るには delegate を設定し、利用許可を取得した上で startUpdatingLocation() を呼ぶ必要があります。
+
+また、didUpdateLocations は位置情報が更新されるたびに自動で呼ばれるため、最新の速度や位置をリアルタイムで取得できます。
+
 **もしこう書かなかったら：**
+
+CLLocationManager を使わなければ現在地や移動速度を取得できません。
+
+また、requestWhenInUseAuthorization() を呼ばない場合は位置情報の利用許可が表示されず、GPSが使用できません。
+
+さらに、startUpdatingLocation() を呼ばないと位置情報が更新されず、速度も常に0のままになります。
 
 ---
 
