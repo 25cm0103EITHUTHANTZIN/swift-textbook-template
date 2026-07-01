@@ -18,10 +18,18 @@ ChatGPT
 
 **@Observable　と　@Stateの違いはありますか？
 
+| @State | @Observable | 
+|------|------|
+|Viewが持つデータ|クラスの中身を監視する|
+|状態を保持する|値の変更を通知する|
+|View側で付ける|クラス側で付ける|
+|@State private var motionManager = MotionManager()|@Observable class MotionManager { ... }|
 
 
 **自分の理解：**
-（回答を受けて自分がどう理解したか。納得できたか、さらに疑問が生まれたか）
+
+- @State → Viewが持つデータ
+- @Observable → クラスのデータが変わることをSwiftUIへ知らせる
 
 ### Q2
 
