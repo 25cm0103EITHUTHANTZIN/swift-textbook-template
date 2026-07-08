@@ -189,7 +189,36 @@ yaw: motionManager.yaw
 
 「MotionManagerが取得したデータを、それぞれの画面（View）へ渡している」
 
+```swift
+LevelIndicator(
+    pitch: motionManager.pitch,
+    roll: motionManager.roll
+)
+```
+ここで
+
+「LevelIndicatorさん、この2つの値を使って水平器を描いてください。」　という意味です。
+
+```swift
+DataDisplay(
+    pitch: motionManager.pitch,
+    roll: motionManager.roll,
+    yaw: motionManager.yaw
+)
+```
+ここで
+
+「DataDisplayさん、この3つの値を画面に表示してください。」という意味です。
+
+つまり　DataDisplayは数字を表示する担当です。
+
 **自分の理解：**
+
+- MotionManager … センサーからデータを取得する担当
+- LevelIndicator … 受け取った pitch と roll を使って、バブル（水平器）を動かす担当
+- DataDisplay … 受け取った pitch・roll・yaw を数値として画面に表示する担当
+
+というように、それぞれが役割を分担して1つのアプリを作っているということです。
 
 ### Q4
 
