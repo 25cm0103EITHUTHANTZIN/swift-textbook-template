@@ -398,28 +398,24 @@ CLLocationManager を使わなければ現在地や移動速度を取得でき�
 |------|------|--------|
 | 例：`CMMotionManager` | 加速度・ジャイロ・気圧などのセンサーデータを取得 | `motionManager.startDeviceMotionUpdates(to: .main) { ... }` |
 | 例：`CMPedometer` | 歩数や歩行距離をカウント | `pedometer.queryPedometerData(from: startDate, to: Date())` |
+| 例：`startDeviceMotionUpdates()`| センサーの取得を開始する| motionManager.startDeviceMotionUpdates(to: .main) { ... } |
+| 例：`stopDeviceMotionUpdates()`| センサーの取得を停止する | motionManager.stopDeviceMotionUpdates()|
+| 例：`@Observable`| クラスのデータが変わると、SwiftUIの画面を自動更新する| @Observable class MotionManager { ... } |
+| 例：`[weak self]`| クロージャがselfを強く保持しないようにし、メモリリークを防ぐ| { [weak self] motion, error in ... }|
+| 例：`init()`| インスタンス生成時に一度だけ実行される初期化メソッド| init() { isAvailable = ... } |
+| 例：`deviceMotionUpdateInterval`| センサーの更新かんかくを設定する| motionManager.deviceMotionUpdateInterval = 1.0 / 60.0 |
+| 例：`CMDeviceMotion`|センサーから取得した姿勢や加速度などの情報| motion.attitude.pitch |
+| 例：`attitude`| iPhoneの姿勢（向き）の情報を取得する| motion.attitude |
+| 例：`pitch`| 前後の傾きを取得する| motion.attitude.pitch |
+| 例：`roll`| 左右の傾きを取得する| motion.attitude.roll |
+| 例：`yaw`| 水平方向の回転を取得する | motion.attitude.yaw |
+| 例：`TimelineView`| 一定時間ごとに画面を更新するView| TimelineView(.periodic(from: .now, by: 1))|
+| 例：`startUpdatingLocation()`| 現在地の取得を開始する	| locationManager.startUpdatingLocation()|
+| 例：`stopUpdatingLocation()`| 	現在地の取得を停止する| locationManager.stopUpdatingLocation()|
 | 例：| | |
 | 例：| | |
 | 例：| | |
-| 例：| | |
-| 例：| | |
-| 例：| | |
-| 例：| | |
-| 例：| | |
-| 例：| | |
-| 例：| | |
-| 例：| | |
-| 例：| | |
-| 例：| | |
-| 例：| | |
-| 例：| | |
-| 例：| | |
-| 例：| | |
-| 例：| | |
-| 例：| | |
-| 例：| | |
-| 例：| | |
-| 例：| | |
+
 
 ## 自分の実験メモ
 
