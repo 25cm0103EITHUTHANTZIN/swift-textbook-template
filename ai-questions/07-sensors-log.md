@@ -271,7 +271,82 @@ DataDisplay(
 
 このように、画面の表示・非表示に合わせてセンサーの開始と停止を管理する役割を持っています。
 
-### Q4
+### Q8
+
+**質問：**
+
+```swift
+struct LevelIndicator: View {
+    let pitch: Double
+    let roll: Double
+    
+    private let maxOffset: CGFloat = 100
+    
+    private var xOffset: CGFloat {
+        CGFloat(roll) * maxOffset
+    }
+    
+    private var yOffset: CGFloat {
+        CGFloat(pitch) * maxOffset
+    }
+    
+    private var isLevel: Bool {
+        abs(pitch) < 0.03 && abs(roll) < 0.03
+    }
+    
+    var body: some View {
+        ZStack {
+            // 外側の円
+            Circle()
+                .stroke(.gray.opacity(0.3), lineWidth: 2)
+                .frame(width: 250, height: 250)
+            
+            // 中心の十字線
+            Path { path in
+                path.move(to: CGPoint(x: 125, y: 0))
+                path.addLine(to: CGPoint(x: 125, y: 250))
+                path.move(to: CGPoint(x: 0, y: 125))
+                path.addLine(to: CGPoint(x: 250, y: 125))
+            }
+            .stroke(.gray.opacity(0.2), lineWidth: 1)
+            .frame(width: 250, height: 250)
+            
+            // 中間の円
+            Circle()
+                .stroke(.gray.opacity(0.2), lineWidth: 1)
+                .frame(width: 125, height: 125)
+            
+            // バブル（傾きに応じて移動）
+            Circle()
+                .fill(isLevel ? .green : .red)
+                .frame(width: 40, height: 40)
+                .opacity(0.8)
+                .shadow(color: isLevel ? .green : .red, radius: 8)
+                .offset(
+                    x: max(-maxOffset, min(maxOffset, xOffset)),
+                    y: max(-maxOffset, min(maxOffset, yOffset))
+                )
+                .animation(.spring(duration: 0.1), value: xOffset)
+                .animation(.spring(duration: 0.1), value: yOffset)
+            
+            // 水平時の表示
+            if isLevel {
+                Text("水平!")
+                    .font(.headline)
+                    .foregroundStyle(.green)
+                    .offset(y: 140)
+            }
+        }
+    }
+}
+```
+この部分を説明して下さい。
+
+**AIの回答の要点：**
+
+**自分の理解：**
+
+### Q9
 
 **質問：**
 
@@ -279,7 +354,7 @@ DataDisplay(
 
 **自分の理解：**
 
-### Q4
+### Q10
 
 **質問：**
 
@@ -287,7 +362,7 @@ DataDisplay(
 
 **自分の理解：**
 
-### Q4
+### Q11
 
 **質問：**
 
@@ -295,7 +370,7 @@ DataDisplay(
 
 **自分の理解：**
 
-### Q4
+### Q12
 
 **質問：**
 
@@ -303,7 +378,7 @@ DataDisplay(
 
 **自分の理解：**
 
-### Q4
+### Q13
 
 **質問：**
 
@@ -311,7 +386,7 @@ DataDisplay(
 
 **自分の理解：**
 
-### Q4
+### Q14
 
 **質問：**
 
