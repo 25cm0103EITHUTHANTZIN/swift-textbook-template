@@ -1,42 +1,277 @@
 # 第8章：ウィジェット
 
-> 執筆者：（氏名）
-> 最終更新：YYYY-MM-DD
+> 執筆者：　イトゥタンジン
+> 最終更新：2026-07-17
 
 ## この章で学ぶこと
 
-（この章で扱うトピックの概要を2〜3行で書く。自分の言葉で。）
-
-例：この章では、WidgetKitを使ってホーム画面やロック画面に表示できるウィジェットを実装する方法を学ぶ。具体的には毎日異なる名言を表示するウィジェットを題材にして、TimelineProviderの仕組み、ウィジェットビューの構成、複数サイズへの対応、そしてメインアプリとの連携方法を学ぶ。
+この章では、WidgetKitを使ってiPhoneのホーム画面に表示できるウィジェットの作成方法を学びます。ウィジェットに表示するデータを管理するTimelineEntryやTimelineProviderの役割を理解し、日付に応じて表示内容を更新する仕組みを学習します。また、CalendarやDateを利用して「毎日0時に更新する」スケジュールを設定する方法や、WidgetFamilyを使って小サイズ・中サイズなど、ウィジェットのサイズごとに異なるレイアウトを表示する方法も学びます。さらに、StaticConfigurationによるウィジェットの設定、containerBackgroundによる背景デザイン、#Previewを使ったプレビュー機能など、WidgetKitの基本的な使い方を一通り習得し、ホーム画面で動作する日替わり名言ウィジェットを完成させます。
 
 ## 模範コードの全体像
 
-（教員から配布された模範コードをここに貼り付ける）
-
 ```swift
-// ここに模範コード全体を貼る
+//
+//  QuoteWidget.swift
+//  QuoteWidget
+//
+//  Created by cmStudent on 2026/07/01.
+//
+
+
+// ============================================
+// ■ ウィジェット側のコード（自動生成された QuoteWidget.swift を "全置換"）
+// ============================================
+// ※ 下の /* ... */ を外し、自動生成ファイルの中身を全部消してから貼り付けます。
+// ※ Quote と QuoteStore は手順3で QuoteStore.swift に移し、両ターゲットの
+//    Target Membership に入れてあるので、ここでは再定義しません。
+// ============================================
+
+
+ import WidgetKit
+ import SwiftUI
+ 
+ // MARK: - タイムラインエントリ
+ 
+ struct QuoteEntry: TimelineEntry {
+ let date: Date
+ let quote: Quote
+ }
+ 
+ // MARK: - タイムラインプロバイダ
+ 
+ struct QuoteProvider: TimelineProvider {
+ // プレースホルダー（読み込み中の仮表示）
+ func placeholder(in context: Context) -> QuoteEntry {
+ QuoteEntry(
+ date: Date(),
+ quote: Quote(id: 0, text: "読み込み中...", author: "")
+ )
+ }
+ 
+ // スナップショット（ウィジェットギャラリーでのプレビュー）
+ func getSnapshot(in context: Context, completion: @escaping (QuoteEntry) -> Void) {
+ let entry = QuoteEntry(
+ date: Date(),
+ quote: QuoteStore.todaysQuote()
+ )
+ completion(entry)
+ }
+ 
+ // タイムライン（実際のウィジェット更新スケジュール）
+ func getTimeline(in context: Context, completion: @escaping (Timeline<QuoteEntry>) -> Void) {
+ let currentDate = Date()
+ let quote = QuoteStore.todaysQuote()
+ let entry = QuoteEntry(date: currentDate, quote: quote)
+ 
+ // 次の日の0時にウィジェットを更新
+ let tomorrow = Calendar.current.startOfDay(
+ for: Calendar.current.date(byAdding: .day, value: 1, to: currentDate)!
+ )
+ 
+ let timeline = Timeline(entries: [entry], policy: .after(tomorrow))
+ completion(timeline)
+ }
+ }
+ 
+ // MARK: - ウィジェットのビュー
+ 
+ struct QuoteWidgetEntryView: View {
+ var entry: QuoteProvider.Entry
+ @Environment(\.widgetFamily) var family
+ 
+ var body: some View {
+ switch family {
+ case .systemSmall:
+ smallWidget
+ case .systemMedium:
+ mediumWidget
+ default:
+ mediumWidget
+ }
+ }
+ 
+ // 小サイズ
+ var smallWidget: some View {
+ VStack(spacing: 4) {
+ Image(systemName: "quote.opening")
+ .font(.caption)
+ .foregroundStyle(.blue)
+ 
+ Text(entry.quote.text)
+ .font(.caption)
+ .bold()
+ .multilineTextAlignment(.center)
+ .lineLimit(3)
+ 
+ Text(entry.quote.author)
+ .font(.caption2)
+ .foregroundStyle(.secondary)
+ }
+ .padding(12)
+ }
+ 
+ // 中サイズ
+ var mediumWidget: some View {
+ HStack(spacing: 16) {
+ Image(systemName: "quote.opening")
+ .font(.title)
+ .foregroundStyle(.blue)
+ 
+ VStack(alignment: .leading, spacing: 4) {
+ Text("今日の名言")
+ .font(.caption2)
+ .foregroundStyle(.secondary)
+ 
+ Text(entry.quote.text)
+ .font(.subheadline)
+ .bold()
+ 
+ Text("— \(entry.quote.author)")
+ .font(.caption)
+ .foregroundStyle(.secondary)
+ }
+ 
+ Spacer()
+ }
+ .padding()
+ }
+ }
+ 
+ // MARK: - ウィジェット定義
+ 
+ @main
+ struct QuoteWidget: Widget {
+ let kind: String = "QuoteWidget"
+ 
+ var body: some WidgetConfiguration {
+ StaticConfiguration(kind: kind, provider: QuoteProvider()) { entry in
+ QuoteWidgetEntryView(entry: entry)
+ .containerBackground(.fill.tertiary, for: .widget)
+ }
+ .configurationDisplayName("今日の名言")
+ .description("日替わりで名言を表示します")
+ .supportedFamilies([.systemSmall, .systemMedium])
+ }
+ }
+ 
+ // MARK: - プレビュー
+ 
+ #Preview(as: .systemMedium) {
+ QuoteWidget()
+ } timeline: {
+ QuoteEntry(date: .now, quote: QuoteStore.todaysQuote())
+ }
+
+
 ```
 
 **このアプリは何をするものか：**
 
-（アプリの動作を自分の言葉で説明する。スクリーンショットを貼ってもよい。）
+このアプリは、毎日異なる名言をホーム画面のウィジェットに表示するアプリです。
+
+あらかじめ登録されている名言の中から、その日の名言を自動で選び、作者名と一緒に表示します。
+
+ウィジェットは毎日0時に自動更新されるため、ホーム画面を見るだけで毎日新しい名言を楽しむことができます。
+
+また、ウィジェットのサイズ（小・中）に応じて表示レイアウトが切り替わり、見やすいデザインで名言を確認できるようになっています。
 
 ## コードの詳細解説
 
 ### TimelineProviderの仕組み
 
 ```swift
-// 該当部分のコードを抜粋して貼る
+struct QuoteProvider: TimelineProvider {
+ // プレースホルダー（読み込み中の仮表示）
+ func placeholder(in context: Context) -> QuoteEntry {
+ QuoteEntry(
+ date: Date(),
+ quote: Quote(id: 0, text: "読み込み中...", author: "")
+ )
+ }
+ 
+ // スナップショット（ウィジェットギャラリーでのプレビュー）
+ func getSnapshot(in context: Context, completion: @escaping (QuoteEntry) -> Void) {
+ let entry = QuoteEntry(
+ date: Date(),
+ quote: QuoteStore.todaysQuote()
+ )
+ completion(entry)
+ }
+ 
+ // タイムライン（実際のウィジェット更新スケジュール）
+ func getTimeline(in context: Context, completion: @escaping (Timeline<QuoteEntry>) -> Void) {
+ let currentDate = Date()
+ let quote = QuoteStore.todaysQuote()
+ let entry = QuoteEntry(date: currentDate, quote: quote)
+ 
+ // 次の日の0時にウィジェットを更新
+ let tomorrow = Calendar.current.startOfDay(
+ for: Calendar.current.date(byAdding: .day, value: 1, to: currentDate)!
+ )
+ 
+ let timeline = Timeline(entries: [entry], policy: .after(tomorrow))
+ completion(timeline)
+ }
+ }
 ```
 
 **何をしているか：**
-（この部分が果たしている役割を説明する）
+
+TimelineProviderは、ウィジェットに「どのデータを表示するか」と「いつ表示内容を更新するか」を管理する仕組みです。
+
+このコードでは、QuoteProviderという構造体がTimelineProviderに準拠しています。TimelineProviderを使用する場合は、基本的にplaceholder、getSnapshot、getTimelineの3つのメソッドを実装します。
+
+placeholderは、ウィジェットのデータがまだ準備できていないときに表示する仮の内容を返します。このアプリでは、「読み込み中...」という文字を表示するQuoteEntryを作成しています。
+
+getSnapshotは、ウィジェットを追加するときのギャラリーやプレビュー画面で使用するデータを返します。QuoteStore.todaysQuote()を呼び出し、その日の名言を取得してQuoteEntryに入れています。作成したエントリは、completion(entry)によってWidgetKit側に渡されます。
+
+getTimelineは、実際にホーム画面へ表示するデータと、次にウィジェットを更新する日時を設定します。現在日時を取得し、その日の名言をQuoteEntryに入れています。その後、Calendarを使って明日の0時を計算し、.after(tomorrow)を指定しています。これにより、明日の0時以降にWidgetKitが新しいタイムラインを取得し、次の日の名言に更新します。
 
 **なぜこう書くのか：**
-（別の書き方ではなく、この書き方が選ばれている理由を説明する）
+
+通常のSwiftUIアプリは、ユーザーが操作したり、データが変更されたりすると画面がすぐに更新されます。しかし、ウィジェットはアプリのように常に動き続けているわけではありません。
+
+そのため、ウィジェットではTimelineProviderを使って、あらかじめ表示データと更新予定をWidgetKitに渡す必要があります。
+
+このアプリでは、名言を1日ごとに変更したいため、更新タイミングを明日の0時に設定しています。
+
+policy: .after(tomorrow)
+
+と書くことで、「明日の0時を過ぎたら、新しいタイムラインを要求してください」という予定をWidgetKitに伝えています。
+
+また、completionを使って結果を返すのは、WidgetKitが必要なタイミングで処理を呼び出し、データの準備が完了した後に結果を受け取る仕組みになっているためです。
+
+getTimelineが直接Timelineをreturnするのではなく、次のように書く必要があります。
+
+completion(timeline)
+
+この書き方によって、将来Web APIなどから非同期でデータを取得する場合にも対応できます.
 
 **もしこう書かなかったら：**
-（この部分を省略したり変えたりすると何が起きるか。実際に試した結果があればここに書く）
+
+TimelineProviderを実装しなかった場合、WidgetKitはウィジェットに表示するデータや更新タイミングを判断できません。そのため、ウィジェットを正しく作成できず、コンパイルエラーになる可能性があります。
+
+placeholderを書かなかった場合、TimelineProviderに必要なメソッドが不足するため、プロトコルに準拠していないというエラーが発生します。また、データの読み込み中に表示する内容がなくなります。
+
+getSnapshotを書かなかった場合も、TimelineProviderへの準拠に必要な処理が不足します。ウィジェットギャラリーやプレビューで、サンプルの表示内容を作れなくなります。
+
+getTimelineを書かなかった場合、実際のウィジェットに表示するデータと更新予定を渡せないため、ウィジェットを正常に動作させることができません。
+
+次の処理を書かなかった場合、
+
+completion(timeline)
+
+作成したタイムラインがWidgetKit側に渡されません。そのため、処理が完了せず、ウィジェットにデータが表示されない可能性があります。
+
+また、更新ポリシーを次のように変更すると、
+
+policy: .never
+
+WidgetKitによる自動更新が行われなくなります。そのため、日付が変わっても名言が自動的に切り替わらず、アプリ側から更新を要求するまで同じ名言が表示され続ける可能性があります。
+
+反対に、更新時間を現在時刻に近すぎる時間へ設定しても、ウィジェットは指定した時刻どおりに必ず更新されるとは限りません。WidgetKitがバッテリー消費などを考慮し、実際の更新タイミングを調整するためです。
+
+このコードでは、毎日内容が変わる名言アプリに合わせて、明日の0時を次の更新予定として設定しています。
 
 ---
 
@@ -47,6 +282,67 @@
 ```
 
 **何をしているか：**
+
+QuoteEntryは、ウィジェットに表示する1回分のデータをまとめる構造体です。
+
+struct QuoteEntry: TimelineEntry
+
+と書くことで、QuoteEntryがWidgetKitのTimelineEntryプロトコルに準拠することを表しています。
+
+この構造体には、次の2つのデータがあります。
+
+let date: Date
+let quote: Quote
+
+dateは、そのデータをウィジェットに表示する日時です。quoteには、表示する名言の文章や作者名が入っています。
+
+例えば、次のようなデータが1つのQuoteEntryになります。
+
+```swift
+QuoteEntry(
+    date: Date(),
+    quote: Quote(
+        id: 1,
+        text: "失敗は成功のもと",
+        author: "ことわざ"
+    )
+)
+```
+
+QuoteWidgetEntryViewは、QuoteEntryに入っているデータを実際のウィジェット画面に表示するためのビューです。
+
+var entry: QuoteProvider.Entry
+
+このentryには、QuoteProviderが作成したQuoteEntryが渡されます。
+
+画面には、次のようにして名言の文章を表示しています。
+
+Text(entry.quote.text)
+
+作者名は、次のように表示しています。
+
+Text(entry.quote.author)
+
+@Environment(\.widgetFamily) var family
+
+によって、現在表示されているウィジェットのサイズを取得しています。
+
+その後、switch文を使って、小サイズの場合はsmallWidget、中サイズの場合はmediumWidgetを表示しています。
+
+```swift
+switch family {
+case .systemSmall:
+    smallWidget
+
+case .systemMedium:
+    mediumWidget
+
+default:
+    mediumWidget
+}
+```
+
+小サイズでは縦方向に配置するため、VStackを使用しています。中サイズでは、アイコンと名言を横方向に並べるため、HStackを使用しています。
 
 **なぜこう書くのか：**
 
