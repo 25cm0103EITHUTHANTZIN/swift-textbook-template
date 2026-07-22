@@ -226,7 +226,7 @@ LinearGradient の startPoint と endPoint には、グラデーションをど�
 **よく使う値一覧**
 
 |値|意味|グラデーションの向き|
-|**|**|**|
+|---|---|---|
 |.top|	上中央|	上 → 下|
 |.bottom|	下中央	|下 → 上|
 |.leading|	左中央	|左 → 右|
@@ -237,7 +237,17 @@ LinearGradient の startPoint と endPoint には、グラデーションをど�
 |.bottomTrailing|	右下|	右下 → 左上|
 |.center|	中央	|中央から（開始・終了位置として使用可能）|
 
+
 **自分の理解：**
+
+leading と trailing は単純に「左・右」というより、文字を読む方向を基準にしています。
+
+英語のように左から右へ読む言語では
+
+- leading = 左
+- trailing = 右
+  
+そのため、SwiftUIでは left / right ではなく leading / trailing が使われています。これにより、多言語対応しやすいUIを作ることができます。
 
 ### Q9
 
