@@ -278,7 +278,79 @@ WidgetKitによる自動更新が行われなくなります。そのため、�
 ### TimelineEntryとウィジェットビュー
 
 ```swift
-// 該当部分のコードを抜粋して貼る
+// MARK: - タイムラインエントリ
+
+struct QuoteEntry: TimelineEntry {
+    let date: Date
+    let quote: Quote
+}
+
+// MARK: - ウィジェットのビュー
+
+struct QuoteWidgetEntryView: View {
+    var entry: QuoteProvider.Entry
+
+    @Environment(\.widgetFamily) var family
+
+    var body: some View {
+        switch family {
+        case .systemSmall:
+            smallWidget
+
+        case .systemMedium:
+            mediumWidget
+
+        default:
+            mediumWidget
+        }
+    }
+
+    // 小サイズ
+    var smallWidget: some View {
+        VStack(spacing: 4) {
+            Image(systemName: "quote.opening")
+                .font(.caption)
+                .foregroundStyle(.blue)
+
+            Text(entry.quote.text)
+                .font(.caption)
+                .bold()
+                .multilineTextAlignment(.center)
+                .lineLimit(3)
+
+            Text(entry.quote.author)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
+        .padding(12)
+    }
+
+    // 中サイズ
+    var mediumWidget: some View {
+        HStack(spacing: 16) {
+            Image(systemName: "quote.opening")
+                .font(.title)
+                .foregroundStyle(.blue)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("今日の名言")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+
+                Text(entry.quote.text)
+                    .font(.subheadline)
+                    .bold()
+
+                Text("— \(entry.quote.author)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+        }
+        .padding()
+    }
+}
 ```
 
 **何をしているか：**
@@ -346,35 +418,161 @@ default:
 
 **なぜこう書くのか：**
 
+TimelineEntryとウィジェットビューを分けて作ることで、表示するデータと画面の見た目をそれぞれ独立して管理できます。
+
+QuoteEntryは「いつ・どの名言を表示するか」というデータだけを持ち、QuoteWidgetEntryViewはそのデータをどのようなレイアウトで表示するかを担当しています。
+
+このように役割を分けることで、表示する名言が変わってもビューのレイアウトを変更する必要がなく、保守しやすいコードになります。
+
+また、@Environment(\.widgetFamily)を使用することで、現在のウィジェットのサイズを取得し、小サイズと中サイズでそれぞれ最適なレイアウトを表示できます。
+
+サイズごとに表示方法を切り替えることで、文字が見切れたり、余白が不自然になったりすることを防ぎ、見やすいウィジェットを作ることができます。
+
 **もしこう書かなかったら：**
+
+QuoteEntryをTimelineEntryとして作成しなかった場合、WidgetKitは表示するデータとして認識できず、ウィジェットを正常に動作させることができません。
+
+また、QuoteWidgetEntryViewがなければ、QuoteEntryにデータが入っていても画面に表示する方法がないため、ウィジェットには何も表示されません。
+
+さらに、@Environment(\.widgetFamily)やswitch familyを書かなかった場合、小サイズと中サイズで同じレイアウトを使用することになります。
+
+その結果、小サイズでは文字が途中で切れたり、中サイズでは余白が多くなったりして、見た目や使いやすさが悪くなる可能性があります。
 
 ---
 
 ### ウィジェットサイズごとのレイアウト
 
 ```swift
-// 該当部分のコードを抜粋して貼る
+@Environment(\.widgetFamily) var family
+
+var body: some View {
+    switch family {
+    case .systemSmall:
+        smallWidget
+
+    case .systemMedium:
+        mediumWidget
+
+    default:
+        mediumWidget
+    }
+}
+
+// 小サイズ
+var smallWidget: some View {
+    VStack(spacing: 4) {
+        Image(systemName: "quote.opening")
+            .font(.caption)
+            .foregroundStyle(.blue)
+
+        Text(entry.quote.text)
+            .font(.caption)
+            .bold()
+            .multilineTextAlignment(.center)
+            .lineLimit(3)
+
+        Text(entry.quote.author)
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+    }
+    .padding(12)
+}
+
+// 中サイズ
+var mediumWidget: some View {
+    HStack(spacing: 16) {
+        Image(systemName: "quote.opening")
+            .font(.title)
+            .foregroundStyle(.blue)
+
+        VStack(alignment: .leading, spacing: 4) {
+            Text("今日の名言")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+
+            Text(entry.quote.text)
+                .font(.subheadline)
+                .bold()
+
+            Text("— \(entry.quote.author)")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+
+        Spacer()
+    }
+    .padding()
+}
 ```
 
 **何をしているか：**
 
+このコードは、ウィジェットのサイズに合わせて表示レイアウトを切り替えています。
+
+@Environment(\.widgetFamily)を使って、現在のウィジェットが小サイズか中サイズかを取得しています。
+
+その後、switch familyでサイズを確認し、小サイズの場合はsmallWidget、中サイズの場合はmediumWidgetを表示しています。
+
+小サイズでは、VStackを使ってアイコン、名言、作者名を縦方向に並べています。中サイズでは、HStackを使ってアイコンと名言の部分を横方向に並べています。
+
 **なぜこう書くのか：**
 
+ウィジェットはサイズによって表示できる範囲が異なるため、それぞれのサイズに合ったレイアウトを作る必要があります。
+
+小サイズは横幅が狭いため、内容を縦に並べることで見やすくしています。また、名言が長すぎないように.lineLimit(3)を設定しています。
+
+中サイズは横幅が広いため、アイコンと文章を横に並べることで、スペースを有効に使っています。
+
+また、smallWidgetとmediumWidgetを別々のプロパティに分けることで、コードが読みやすくなり、サイズごとのデザインも修正しやすくなります。
+
 **もしこう書かなかったら：**
+
+ウィジェットサイズごとのレイアウトを分けなかった場合、すべてのサイズで同じ表示になります。
+
+例えば、中サイズ用の横長レイアウトを小サイズで表示すると、文字が入りきらなかったり、作者名が見えなくなったりする可能性があります。
+
+反対に、小サイズ用の縦並びレイアウトを中サイズで表示すると、横のスペースが余ってしまい、見た目のバランスが悪くなる可能性があります。
+
+また、.lineLimit(3)を書かなかった場合、長い名言が多くの行に表示され、作者名が画面外に押し出されることがあります。
 
 ---
 
 ### メインアプリとの連携
 
 ```swift
-// 該当部分のコードを抜粋して貼る
+// 今日の名言を取得
+let quote = QuoteStore.todaysQuote()
+
+// タイムラインエントリを作成
+let entry = QuoteEntry(
+    date: Date(),
+    quote: quote
+)
 ```
 
 **何をしているか：**
 
+このコードでは、メインアプリとウィジェットで共通のQuoteStoreを利用して、その日に表示する名言を取得しています。
+
+QuoteStore.todaysQuote()を呼び出すことで、その日の名言を取得し、それをQuoteEntryに保存しています。QuoteEntryに保存されたデータは、QuoteWidgetEntryViewへ渡され、ホーム画面のウィジェットに表示されます。
+
+また、QuoteとQuoteStoreをメインアプリとウィジェットの両方で共有しているため、同じデータを使用できます。
+
 **なぜこう書くのか：**
 
+メインアプリとウィジェットで別々に名言のデータを作成すると、同じ内容を2か所で管理しなければならず、修正するときに両方を書き換える必要があります。
+
+そのため、QuoteとQuoteStoreを共通ファイルとして管理し、メインアプリとウィジェットの両方から利用できるようにしています。
+
+こうすることで、名言を追加・修正するときはQuoteStoreだけを変更すればよくなり、コードの重複を防ぐことができます。
+
 **もしこう書かなかったら：**
+
+QuoteStore.todaysQuote()を使わなかった場合、ウィジェットは表示する名言を取得できず、毎日の名言を表示できません。
+
+また、QuoteやQuoteStoreをウィジェット側だけ、またはメインアプリ側だけに置いた場合、もう一方のターゲットからそのコードを利用できず、**「Cannot find 'QuoteStore' in scope」**などのコンパイルエラーが発生します。
+
+さらに、メインアプリ用とウィジェット用で別々に名言データを管理すると、片方だけ内容が更新されてしまう可能性があり、アプリとウィジェットで異なる名言が表示されるなど、不整合が起こる原因になります。
 
 ---
 
