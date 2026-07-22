@@ -73,18 +73,19 @@ UIの変更は基本的に Main Thread で行います。
 @State private var offset: CGSize = .zero
     @State private var lastOffset: CGSize = .zero
 ```
-    でCGsizeとはなんですか？なんで　.zero?
+
+で CGsizeとはなんですか？なんで　.zero?
 
 **AIの回答の要点：**
 
-CGSize は  幅(width) と 高さ(height) をまとめて持つ型 です。
+CGSize は  `幅(width) と 高さ(height)` をまとめて持つ型 です。
 
 なぜドラッグでCGSize？
 
 ドラッグは
 
 - 横に何px動いた？
-- 縦に何px動いた？ の両方が必要です。
+- 縦に何px動いた？ tの両方が必要です。
 
 CGSize.zero は CGSize(width: 0, height: 0) と全く同じです。
 
@@ -210,6 +211,49 @@ scaleEffectとは？
 
 **自分の理解：**
 
+「画面を更新する場所で、今から1秒後に次の処理を実行します」ということ！
+
+### Q8
+
+**質問：**
+
+startPoint: .topLeading,　endPoint: .bottomTrailing　の他どんな値がありますか？
+
+**AIの回答の要点：**
+
+LinearGradient の startPoint と endPoint には、グラデーションをどこから始めてどこで終わるかを指定するための UnitPoint が使われます。
+
+**よく使う値一覧**
+
+|値|意味|グラデーションの向き|
+|**|**|**|
+|.top|	上中央|	上 → 下|
+|.bottom|	下中央	|下 → 上|
+|.leading|	左中央	|左 → 右|
+|.trailing|	右中央	|右 → 左|
+|.topLeading|	左上|	左上 → 右下|
+|.topTrailing|	右上|	右上 → 左下|
+|.bottomLeading|	左下	|左下 → 右上|
+|.bottomTrailing|	右下|	右下 → 左上|
+|.center|	中央	|中央から（開始・終了位置として使用可能）|
+
+**自分の理解：**
+
+### Q9
+
+**質問：**
+
+**AIの回答の要点：**
+
+**自分の理解：**
+
+### Q10
+
+**質問：**
+
+**AIの回答の要点：**
+
+**自分の理解：**
 
 ### Q11
 
@@ -218,6 +262,7 @@ scaleEffectとは？
 **AIの回答の要点：**
 
 **自分の理解：**
+
 
 ## 今日の質問を振り返って
 
