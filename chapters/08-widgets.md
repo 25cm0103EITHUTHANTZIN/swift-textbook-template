@@ -585,9 +585,24 @@ QuoteStore.todaysQuote()を使わなかった場合、ウィジェットは表�
 |------|------|--------|
 | 例：`TimelineProvider` | ウィジェットを更新するタイミングとコンテンツを定義 | `struct QuoteProvider: TimelineProvider { ... }` |
 | 例：`@main` + `WidgetConfiguration` | ウィジェットのエントリーポイント | `@main struct QuoteWidget: Widget { ... }` |
-| | | |
-| | | |
-| | | |
+| 例：`TimelineEntry`|　ウィジェットに表示する1回分のデータを表す | `struct QuoteEntry: TimelineEntry`　|
+| 例：`Timeline`| 表示するデータと更新スケジュールを管理する| `Timeline(entries: [entry], policy: .after(tomorrow))` |
+| 例：`placeholder()`| データ読み込み中に表示する仮の内容を設定する | `func placeholder(in: Context)`|
+| 例：`getSnapshot()`| ウィジェットギャラリー用の表示データを返す | `func getSnapshot(in:completion:)`|
+| 例：`getTimeline()`| 実際に表示するデータと更新日時を設定する | `func getTimeline(in:completion:)`|
+| 例：`@Environment(\.widgetFamily)`| 現在のウィジェットサイズを取得する | `@Environment(\.widgetFamily) var family` |
+| 例：`switch`| サイズによって表示内容を切り替える| `switch family { ... }`|
+| 例：`Calendar.current`| 日付を計算するためのカレンダーを取得する | `Calendar.current.startOfDay(for: tomorrow)`|
+| 例：`StaticConfiguration`| ウィジェットの基本設定を行う| `StaticConfiguration(kind: kind, provider: QuoteProvider())` |
+| 例：`@main + Widget`| ウィジェットの開始位置を定義する | @main struct QuoteWidget: Widget |
+| 例：`.configurationDisplayName()`| ウィジェットの名前を設定する |`.configurationDisplayName("今日の名言")`|
+| 例：`.description()`| ウィジェットの説明文を設定する | `.description("日替わりで名言を表示します")` |
+| 例：`.supportedFamilies()`| 対応するウィジェットサイズを指定する | `.supportedFamilies([.systemSmall, .systemMedium])`|
+| 例：`.containerBackground()`| ウィジェット専用の背景を設定する | `.containerBackground(.fill.tertiary, for: .widget)`|
+| 例：``| | |
+| 例：``| | |
+| 例：``| | |
+| 例：``| | |
 
 ## 自分の実験メモ
 
