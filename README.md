@@ -46,6 +46,7 @@
 | 第6章 | [ai-questions/06-gestures-log.md](ai-questions/06-gestures-log.md) |
 | 第7章 | [ai-questions/07-sensors-log.md](ai-questions/07-sensors-log.md) |
 | 第8章 | [ai-questions/08-widgets-log.md](ai-questions/08-widgets-log.md) |
+|　発表準備　|
 
 ---
 
