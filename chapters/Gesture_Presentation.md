@@ -47,7 +47,7 @@ RoundedRectangle(cornerRadius: 16)
 @State private var offset: CGSize = .zero
 ```
 
-ドラッグした位置を保存する変数です。
+ユーザーがドラッグした位置を保存する変数です。
 
 ②
 
